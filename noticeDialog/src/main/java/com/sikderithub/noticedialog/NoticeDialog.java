@@ -194,7 +194,12 @@ public class NoticeDialog implements View.OnClickListener {
                 if (jsonData.has("negativeButtonAction"))
                     data.setNegativeButtonAction(jsonData.getString("negativeButtonAction"));
 
+            }else {
+                dialog.dismiss();
+                return null;
             }
+
+
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -349,6 +354,11 @@ public class NoticeDialog implements View.OnClickListener {
             super.onPostExecute(networkData);
 
             data = getDataFRomJson(networkData);
+            if (data == null){
+                dialogCallback.onDialogDismiss();
+                return;
+            }
+
             bindData(data);
         }
     }
