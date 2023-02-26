@@ -1,4 +1,4 @@
-package com.example.noticedialog;
+package com.sikderithub.noticedialog;
 
 import org.junit.Test;
 

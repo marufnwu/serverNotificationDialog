@@ -1,9 +1,10 @@
 plugins {
     id 'com.android.library'
+    id 'maven-publish'
 }
 
 android {
-    namespace 'com.example.noticedialog'
+    namespace 'com.sikderithub.noticedialog'
     compileSdk 33
 
     defaultConfig {

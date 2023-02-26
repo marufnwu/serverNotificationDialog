@@ -1,18 +1,18 @@
-package com.example.noticedialog;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.sikderithub.noticedialog;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
     public static final String baseurl = "https://sikderithub.com/dialog.php";
     public static final String appName = "VG";
+    private static final String TAG = "MainActivity";
     private final Activity activity = this;
 
     @Override

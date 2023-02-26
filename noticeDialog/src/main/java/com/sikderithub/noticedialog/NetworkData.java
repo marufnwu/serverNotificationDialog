@@ -1,4 +1,4 @@
-package com.example.noticedialog;
+package com.sikderithub.noticedialog;
 
 public class NetworkData {
     private boolean isCancelable;

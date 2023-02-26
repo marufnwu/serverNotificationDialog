@@ -1,4 +1,4 @@
-package com.example.noticedialog;
+package com.sikderithub.noticedialog;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -208,10 +208,6 @@ public class NoticeDialog implements View.OnClickListener {
      * @param data sent by the onPost execute
      */
     private void bindData(NetworkData data) {
-
-        //TODO: data for test have to remove this.
-        //data.setThumbUrl("https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg");
-        //data.setCancelable(true);
 
         if (data.isCancelable())
             dialog.setCancelable(data.isCancelable());

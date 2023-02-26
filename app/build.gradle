@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.noticedialog'
+    namespace 'com.sikderithub.noticedialog'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.noticedialog"
+        applicationId "com.sikderithub.noticedialog"
         minSdk 24
         targetSdk 33
         versionCode 1
