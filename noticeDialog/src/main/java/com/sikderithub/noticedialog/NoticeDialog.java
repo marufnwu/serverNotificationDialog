@@ -40,7 +40,7 @@ public class NoticeDialog implements View.OnClickListener {
     private static android.app.Dialog dialog;
     private final String url;
     private final Context context;
-    private final DialogCallback dialogCallback;
+    boolean isDialogStateEnable = false;
     NetworkData data;
     Button btnPositive;
     Button btnNegative;
@@ -48,8 +48,9 @@ public class NoticeDialog implements View.OnClickListener {
     TextView tvTitle;
     TextView tvBody;
     ProgressBar imageLoading;
+    private DialogCallback dialogCallback;
 
-    private NoticeDialog(Context context, String baseUrl, String appName, DialogCallback dialogCallback) {
+    private NoticeDialog(Context context, String baseUrl, String appName) {
         this.context = context;
 
         Uri buildUri = Uri.parse(baseUrl)
@@ -58,7 +59,6 @@ public class NoticeDialog implements View.OnClickListener {
                 .build();
 
         url = buildUri.toString();
-        this.dialogCallback = dialogCallback;
 
 
         setupDialog();
@@ -68,14 +68,13 @@ public class NoticeDialog implements View.OnClickListener {
      * A static function call by client
      * Create a notice dialog object and setup dialog
      *
-     * @param context        application Context
-     * @param baseUrl        webData url
-     * @param appName        appName
-     * @param dialogCallback for the client
+     * @param context application Context
+     * @param baseUrl webData url
+     * @param appName appName
      * @return a NoticeDialog object
      */
-    public static NoticeDialog init(Context context, String baseUrl, String appName, DialogCallback dialogCallback) {
-        nDialog = new NoticeDialog(context, baseUrl, appName, dialogCallback);
+    public static NoticeDialog init(Context context, String baseUrl, String appName) {
+        nDialog = new NoticeDialog(context, baseUrl, appName);
         return nDialog;
     }
 
@@ -97,7 +96,10 @@ public class NoticeDialog implements View.OnClickListener {
         }
 
 
-        dialog.setOnDismissListener(dialog -> dialogCallback.onDialogDismiss());
+        dialog.setOnDismissListener(dialog -> {
+            if (isDialogStateEnable)
+                dialogCallback.onDialogDismiss();
+        });
     }
 
     /**
@@ -140,6 +142,12 @@ public class NoticeDialog implements View.OnClickListener {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
+    public NoticeDialog getDialogStateCallback(DialogCallback dialogCallback) {
+        isDialogStateEnable = true;
+        this.dialogCallback = dialogCallback;
+        return nDialog;
+    }
+
 
     /**
      * Hide the dialog
@@ -150,6 +158,8 @@ public class NoticeDialog implements View.OnClickListener {
         if (dialog != null && !acc.isFinishing() && !acc.isDestroyed()) {
             dialog.dismiss();
             dialog = null;
+            if (isDialogStateEnable)
+                dialogCallback.onDialogDismiss();
         }
     }
 
@@ -213,7 +223,9 @@ public class NoticeDialog implements View.OnClickListener {
      */
     private void bindData(NetworkData data) {
 
-        data.setCancelable(true);
+        //TestData
+        data.setPositiveButtonAction("proceed");
+        data.setNegativeButtonAction("close");
 
         if (data.isCancelable())
             dialog.setCancelable(data.isCancelable());
@@ -274,7 +286,8 @@ public class NoticeDialog implements View.OnClickListener {
                 hideDialog();
             }
             dialog.show();
-            dialogCallback.onShowDialog();
+            if (isDialogStateEnable)
+                dialogCallback.onShowDialog();
         }
     }
 
@@ -353,7 +366,8 @@ public class NoticeDialog implements View.OnClickListener {
 
                 HttpURLConnection urlConnection = (HttpURLConnection) webUrl.openConnection();
                 try {
-                    dialogCallback.onNetworkCall();
+                    if (isDialogStateEnable)
+                        dialogCallback.onNetworkCall();
 
                     BufferedReader r = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                     StringBuilder total = new StringBuilder();
@@ -362,14 +376,16 @@ public class NoticeDialog implements View.OnClickListener {
                         total.append(line).append('\n');
                     }
 
-                    dialogCallback.onNetworkCallFinished("success");
+                    if (isDialogStateEnable)
+                        dialogCallback.onNetworkCallFinished("success");
 
                     response = total.toString();
                 } finally {
                     urlConnection.disconnect();
                 }
             } catch (IOException e) {
-                dialogCallback.onError(e.getMessage());
+                if (isNetworkConnected())
+                    dialogCallback.onError(e.getMessage());
                 throw new RuntimeException(e);
             }
             return response;
@@ -381,7 +397,8 @@ public class NoticeDialog implements View.OnClickListener {
 
             data = getDataFRomJson(networkData);
             if (data == null) {
-                dialogCallback.onDialogDismiss();
+                if (isDialogStateEnable)
+                    dialogCallback.onDialogDismiss();
                 return;
             }
 
