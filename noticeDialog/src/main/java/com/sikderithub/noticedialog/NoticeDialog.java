@@ -149,7 +149,7 @@ public class NoticeDialog implements View.OnClickListener {
     /**
      * Hide the dialog
      */
-    public void hideDialog() {
+    private void hideDialog() {
         Activity acc = (Activity) context;
 
         if (dialog != null && !acc.isFinishing() && !acc.isDestroyed()) {
