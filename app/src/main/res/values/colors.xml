@@ -9,11 +9,5 @@
     <color name="white">#FFFFFFFF</color>
 
 
-    <color name="positive_btn_background">#FF018786</color>
-    <color name="negative_btn_background">#FF03DAC5</color>
-    <color name="positive_btn_text_color">#fff</color>
-    <color name="negative_btn_text_color">#fff</color>
-    <color name="title_text_color">#000</color>
-    <color name="body_text_color">#4A4A4A</color>
-    <color name="image_loading_progress_color">#673AB7</color>
+
 </resources>

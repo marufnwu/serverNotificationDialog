@@ -7,5 +7,6 @@
     <color name="title_text_color">#000</color>
     <color name="body_text_color">#4A4A4A</color>
     <color name="image_loading_progress_color">#673AB7</color>
+    <color name="dialog_background_color">#fff</color>
 
 </resources>

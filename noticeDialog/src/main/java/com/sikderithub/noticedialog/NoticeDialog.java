@@ -3,7 +3,6 @@ package com.sikderithub.noticedialog;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +15,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -97,12 +97,7 @@ public class NoticeDialog implements View.OnClickListener {
         }
 
 
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                dialogCallback.onDialogDismiss();
-            }
-        });
+        dialog.setOnDismissListener(dialog -> dialogCallback.onDialogDismiss());
     }
 
     /**
@@ -149,7 +144,7 @@ public class NoticeDialog implements View.OnClickListener {
     /**
      * Hide the dialog
      */
-    private void hideDialog() {
+    public void hideDialog() {
         Activity acc = (Activity) context;
 
         if (dialog != null && !acc.isFinishing() && !acc.isDestroyed()) {
@@ -193,8 +188,12 @@ public class NoticeDialog implements View.OnClickListener {
                     data.setNegativeButtonText(jsonData.getString("negativeButtonText"));
                 if (jsonData.has("negativeButtonAction"))
                     data.setNegativeButtonAction(jsonData.getString("negativeButtonAction"));
+                if (jsonData.has("showNegativeButton"))
+                    data.setShowNegativeButton(jsonData.getBoolean("showNegativeButton"));
+                if (jsonData.has("showPositiveButton"))
+                    data.setShowPositiveButton(jsonData.getBoolean("showPositiveButton"));
 
-            }else {
+            } else {
                 dialog.dismiss();
                 return null;
             }
@@ -213,6 +212,8 @@ public class NoticeDialog implements View.OnClickListener {
      * @param data sent by the onPost execute
      */
     private void bindData(NetworkData data) {
+
+        data.setCancelable(true);
 
         if (data.isCancelable())
             dialog.setCancelable(data.isCancelable());
@@ -242,12 +243,12 @@ public class NoticeDialog implements View.OnClickListener {
         } else
             thumbNailImage.setVisibility(View.GONE);
 
-        if (data.getPositiveButtonText() != null)
+        if (data.getPositiveButtonText() != null && data.getPositiveButtonAction() != null)
             btnPositive.setText(data.getPositiveButtonText());
         else
             btnPositive.setVisibility(View.GONE);
 
-        if (data.getNegativeButtonText() != null)
+        if (data.getNegativeButtonText() != null && data.getNegativeButtonAction() != null)
             btnNegative.setText(data.getNegativeButtonText());
         else
             btnNegative.setVisibility(View.GONE);
@@ -283,16 +284,41 @@ public class NoticeDialog implements View.OnClickListener {
         Uri uri;
 
         if (id == R.id.btn_positive) {
-            uri = Uri.parse(data.getPositiveButtonAction());
+            String btnAction = data.getPositiveButtonAction().toLowerCase();
+            if (btnAction.equals("close")) {
+                hideDialog();
+                Activity acc = (Activity) context;
+                acc.finishAffinity();
+            } else if (btnAction.equals("proceed"))
+                hideDialog();
+            else if (URLUtil.isValidUrl(data.getPositiveButtonAction())) {
+                uri = Uri.parse(data.getPositiveButtonAction());
+                makeImplicitIntent(uri);
+            }
+
 
         } else if (id == R.id.btn_negative) {
-            uri = Uri.parse(data.getNegativeButtonAction());
+            String btnAction = data.getNegativeButtonAction().toLowerCase();
+            if (btnAction.equals("close")) {
+                hideDialog();
+                Activity acc = (Activity) context;
+                acc.finishAffinity();
 
-        } else {
+            } else if (btnAction.equals("proceed"))
+                hideDialog();
+
+            else if (URLUtil.isValidUrl(data.getPositiveButtonAction())) {
+                uri = Uri.parse(data.getNegativeButtonAction());
+                makeImplicitIntent(uri);
+            }
+
+        } else if (id == R.id.iv_thumbnail) {
             uri = Uri.parse(data.getThumbAction());
-
+            makeImplicitIntent(uri);
         }
+    }
 
+    private void makeImplicitIntent(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
         context.startActivity(intent);
@@ -354,7 +380,7 @@ public class NoticeDialog implements View.OnClickListener {
             super.onPostExecute(networkData);
 
             data = getDataFRomJson(networkData);
-            if (data == null){
+            if (data == null) {
                 dialogCallback.onDialogDismiss();
                 return;
             }
